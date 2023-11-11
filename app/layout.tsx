@@ -4,6 +4,7 @@ import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { cn } from '@/lib/utils'
+import { EdgeStoreProvider } from '@/lib/edgestore'
 
 const font = Open_Sans({ subsets: ['latin'] })
 
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={cn(font.className , "bg-white dark:bg-[#313338]")}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="webrtc-theme">
-            {children}
-          </ThemeProvider>
+        <body className={cn(font.className, "bg-white dark:bg-[#313338]")}>
+          <EdgeStoreProvider>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="webrtc-theme">
+              {children}
+            </ThemeProvider>
+          </EdgeStoreProvider>
         </body>
       </html>
     </ClerkProvider>
