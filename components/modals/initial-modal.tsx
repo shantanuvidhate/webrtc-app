@@ -3,26 +3,56 @@
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { SingleImageDropzone } from "@/components/modals/single-image-dropzone";
+import { useEdgeStore } from "@/lib/edgestore";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     name: z.string().min(1, {
         message: "Server name is required."
     }),
-    imageUrl: z.string().min(1, {
-        message: "Server image is required."
-    })
+    // imageUrl: z.string().min(1, {
+    //     message: "Server image is required."
+    // })
 });
 export const InitialModal = () => {
 
-    const [isMounted, setIsMounted ] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [file, setFile] = useState<File>();
+    const [isSending, setIsSending] = useState(false);
+    const { edgestore } = useEdgeStore();
+    const [imageUrl, setImageUrl] = useState("");
 
-    useEffect (()=>{
+    const router = useRouter();
+
+    const onClose = () => {
+        setFile(undefined);
+        setIsSending(false)
+    }
+
+    const onChange = async (file?: File) => {
+        if (file) {
+            setIsSending(true);
+            setFile(file);
+
+            const res = await edgestore.publicFiles.upload({
+                file
+            });
+
+            setImageUrl(res.url);
+            console.log(res)
+            onClose();
+        }
+    }
+
+    useEffect(() => {
         setIsMounted(true);
     })
 
@@ -36,7 +66,14 @@ export const InitialModal = () => {
 
     const isLoading = form.formState.isSubmitting;
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(values);
+        try {
+            await axios.post("api/servers", values);
+            form .reset();
+            router.refresh();
+            window.location.reload();
+        } catch (error) {
+
+        }
     }
     if (!isMounted) {
         return null;
@@ -57,15 +94,31 @@ export const InitialModal = () => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                         <div className="space-y-8 px-6">
                             <div className="flex items-center justify-center text-center">
-                                TODO: Image Upload
+                                {/* <SingleImageDropzone className="w-full outline-none" disabled={isSending} value={file} onChange={onChange}/> */}
+
+                                <FormField control={form.control} name="imageUrl" render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <SingleImageDropzone className="w-full outline-none" value={imageUrl} disabled={isSending} onChange={onChange} />
+                                        </FormControl>
+                                    </FormItem>
+                                )} />
+
+                                {/* <FormField control={form.control} name="imageUrl" render={({field})=>(
+                                    <FormItem>
+                                        <FormControl>
+                                            <FileUpload value={field.value} onChange={field.onChange} />
+                                        </FormControl>
+                                    </FormItem>
+                                )}/> */}
                             </div>
-                            <FormField control={form.control} name="name" render={({field})=>(
+                            <FormField control={form.control} name="name" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
                                         Server Name
                                     </FormLabel>
                                     <FormControl>
-                                        <Input disabled={isLoading} className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0" placeholder="Enter server name"{...field}/> 
+                                        <Input disabled={isLoading} className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0" placeholder="Enter server name"{...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
