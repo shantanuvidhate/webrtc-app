@@ -66,8 +66,9 @@ export const InitialModal = () => {
 
     const isLoading = form.formState.isSubmitting;
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        let data = {values,imageUrl}
         try {
-            await axios.post("api/servers", values);
+            await axios.post("api/servers", data);
             form .reset();
             router.refresh();
             window.location.reload();
@@ -104,13 +105,6 @@ export const InitialModal = () => {
                                     </FormItem>
                                 )} />
 
-                                {/* <FormField control={form.control} name="imageUrl" render={({field})=>(
-                                    <FormItem>
-                                        <FormControl>
-                                            <FileUpload value={field.value} onChange={field.onChange} />
-                                        </FormControl>
-                                    </FormItem>
-                                )}/> */}
                             </div>
                             <FormField control={form.control} name="name" render={({ field }) => (
                                 <FormItem>
