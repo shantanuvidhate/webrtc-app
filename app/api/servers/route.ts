@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST (req: Request) {
     try {
-        const {name , imageUrl} = await req.json();
+        const {values:{name}, imageUrl} = await req.json();
+        // const {name , imageUrl} = await req.json();
         const profile = await currentProfile();
 
         if (!profile) {
@@ -16,7 +17,7 @@ export async function POST (req: Request) {
             data : {
                 profileId : profile.id,
                 name,
-                imageUrl : "",  // need to upload edgestore image url
+                imageUrl,  // need to upload edgestore image url
                 inviteCode: uuidv4(),
                 channels : {
                     create : [
