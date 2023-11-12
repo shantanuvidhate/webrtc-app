@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import { Open_Sans } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
-import { ThemeProvider } from '@/components/providers/theme-provider'
 import { cn } from '@/lib/utils'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { EdgeStoreProvider } from '@/lib/edgestore'
+import { ModalProvider } from '@/components/providers/modal-provider'
 
 const font = Open_Sans({ subsets: ['latin'] })
 
@@ -24,6 +25,7 @@ export default function RootLayout({
         <body className={cn(font.className, "bg-white dark:bg-[#313338]")}>
           <EdgeStoreProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="webrtc-theme">
+              <ModalProvider />
               {children}
             </ThemeProvider>
           </EdgeStoreProvider>
