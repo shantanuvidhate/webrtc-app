@@ -2,7 +2,8 @@
 const nextConfig = {
     images: {
       domains: [
-        "files.edgestore.dev"
+        "uploadthing.com",
+        "utfs.io"
       ]
     }
   }
