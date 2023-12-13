@@ -146,7 +146,7 @@ export const ServerSidebar = async ({ serverId }: ServerSidebarProps) => {
                 )}
                 {!!videoChannels?.length && (
                     <div className="mb-2">
-                        <ServerSection sectionType="channels" channelType={ChannelType.AUDIO} role={role} label="Video Channels" />
+                        <ServerSection sectionType="channels" channelType={ChannelType.VIDEO} role={role} label="Video Channels" />
                         <div className="space-y-[2px]">
                             {videoChannels.map((channel) => (
                                 <ServerChannel

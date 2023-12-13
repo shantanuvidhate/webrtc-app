@@ -27,6 +27,7 @@ import { useModal } from "@/hooks/use-modal-store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChannelType } from "@prisma/client";
 import qs from "query-string";
+import { useEffect } from "react";
 
 
 const formSchema = z.object({
@@ -42,30 +43,39 @@ const formSchema = z.object({
 });
 
 export const CreateChannelModal = () => {
-  const { isOpen, onClose, type } = useModal();
+  const { isOpen, onClose, type, data } = useModal();
   const router = useRouter();
   const params = useParams();
 
   const isModalOpen = isOpen && type === "createChannel";
+  const { channelType } = data;
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      type: ChannelType.TEXT
+      type: channelType || ChannelType.TEXT,
     }
   });
+
+  useEffect(() => {
+    if (channelType) {
+      form.setValue("type", channelType);
+    } else {
+      form.setValue("type", ChannelType.TEXT);
+    }
+  }, [channelType, form]);
 
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
-    try { 
+    try {
       //Stringify the url with ServerId using query string
       const url = qs.stringifyUrl({
-        url:"/api/channels",
-        query : {
-          serverId : params?.serverId
+        url: "/api/channels",
+        query: {
+          serverId: params?.serverId
         }
       });
       await axios.post(url, values);
@@ -126,9 +136,9 @@ export const CreateChannelModal = () => {
                   <FormItem>
                     <FormLabel> Channel Type </FormLabel>
                     <Select
-                    disabled = {isLoading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
@@ -136,11 +146,11 @@ export const CreateChannelModal = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                          {Object.values(ChannelType).map((type)=>(
-                            <SelectItem key={type} value={type} className="capitalize">
-                              {type.toLowerCase()}
-                            </SelectItem>
-                          ))}
+                        {Object.values(ChannelType).map((type) => (
+                          <SelectItem key={type} value={type} className="capitalize">
+                            {type.toLowerCase()}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
