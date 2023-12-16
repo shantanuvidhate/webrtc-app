@@ -71,6 +71,9 @@ export const ChatItem = ({ content, currentMember, deleted, fileUrl, id, isUpdat
             });
 
             await axios.patch(url, values);
+            
+            form.reset();
+            setIsEditing(false);
         }catch (error) {
             console.log(error);
         }
