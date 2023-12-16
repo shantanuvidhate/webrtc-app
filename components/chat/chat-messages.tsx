@@ -1,9 +1,20 @@
 "use client";
 
-import { Member } from "@prisma/client";
+import { Member, Message, Profile } from "@prisma/client";
 import { ChatWelcome } from "./chat-welcome";
 import { useChatQuery } from "@/hooks/use-chat-query";
 import { Loader2, ServerCrash } from "lucide-react";
+import { Fragment } from "react";
+import { ChatItem } from "./chat-item";
+import { format } from "date-fns";
+
+const DATE_FORMAT = "d MMM yyyy, HH:mm";
+
+type MessageWithMemberWithProfile = Message & {
+    member: Member & {
+        profile: Profile
+    }
+}
 
 interface ChatMessagesProps {
     name: string;
@@ -28,7 +39,7 @@ export const ChatMessages = ({ apiUrl, chatId, member, name, paramKey, paramValu
     if (status === "pending") {
         return (
             <div className="flex flex-col flex-1 justify-center items-center">
-                <Loader2 className="h-7 w-7 text-zinc-500 animate-spin"/>
+                <Loader2 className="h-7 w-7 text-zinc-500 animate-spin" />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">Loading messages...</p>
             </div>
         )
@@ -37,7 +48,7 @@ export const ChatMessages = ({ apiUrl, chatId, member, name, paramKey, paramValu
     if (status === "error") {
         return (
             <div className="flex flex-col flex-1 justify-center items-center">
-                <ServerCrash className="h-7 w-7 text-zinc-500"/>
+                <ServerCrash className="h-7 w-7 text-zinc-500" />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">Something went wrong!</p>
             </div>
         )
@@ -46,6 +57,27 @@ export const ChatMessages = ({ apiUrl, chatId, member, name, paramKey, paramValu
         <div className="flex-1 flex flex-col py-4 overflow-y-auto">
             <div className="flex-1" />
             <ChatWelcome type={type} name={name} />
+            <div className="flex flex-col-reverse mt-auto">
+                {data?.pages?.map((group, i) => (
+                    <Fragment key={i}>
+                        {group.items.map((message: MessageWithMemberWithProfile) => (
+                            <ChatItem
+                                key={message.id}
+                                id={member.id}
+                                currentMember={member}
+                                member={message.member}
+                                content={message.content}
+                                fileUrl={message.fileUrl}
+                                deleted={message.deleted}
+                                timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
+                                isUpdated={message.updatedAt !== message.createdAt}
+                                socketUrl={socketUrl}
+                                socketQuery={socketQuery}
+                            />
+                        ))}
+                    </Fragment>
+                ))}
+            </div>
         </div>
     );
 }
